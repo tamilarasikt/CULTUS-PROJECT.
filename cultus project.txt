@@ -1,0 +1,205 @@
+Step-by-Step Description of the Project
+Step 1: Dataset Generation and Preparation
+
+A high-dimensional image dataset is required to model complex data distributions. For this project, the MNIST handwritten digit dataset was used because it provides:
+
+28×28 grayscale images (784-dimensional input space)
+
+Clearly defined visual patterns
+
+Easy separation between normal and anomalous samples
+
+Normal Data Definition
+
+Only images of a single digit (digit 0) were treated as normal samples
+
+All other digits (1–9) were treated as anomalies
+
+This setup simulates a realistic anomaly detection scenario where the system is trained only on normal behavior.
+
+Data Loading
+
+Training set: only normal digit samples
+
+Test set: mixture of normal samples and injected anomalies
+
+Images were normalized and converted into tensors
+
+Data was loaded using PyTorch DataLoader for efficient batching
+
+Step 2: Autoencoder (AE) Baseline Architecture
+
+A standard Autoencoder (AE) was implemented as a baseline model.
+
+Encoder
+
+Input layer: flattened 784-dimensional image
+
+Hidden layer: 400 neurons with ReLU activation
+
+Latent space: fixed-size latent vector
+
+Decoder
+
+Mirrors the encoder architecture
+
+Reconstructs the original image from the latent representation
+
+Sigmoid activation ensures pixel values are in the range [0, 1]
+
+Purpose
+
+The AE learns to reconstruct normal images accurately, while anomalous images produce higher reconstruction errors.
+
+Step 3: Variational Autoencoder (VAE) Architecture
+
+A Variational Autoencoder (VAE) was implemented to model a probabilistic latent space.
+
+Encoder
+
+Maps input images to a latent distribution
+
+Outputs:
+
+Mean vector (μ)
+
+Log-variance vector (log σ²)
+
+Reparameterization Trick
+
+To enable backpropagation through stochastic sampling:
+
+𝑧
+=
+𝜇
++
+𝜎
+⋅
+𝜖
+,
+𝜖
+∼
+𝑁
+(
+0
+,
+𝐼
+)
+z=μ+σ⋅ϵ,ϵ∼N(0,I)
+
+This allows gradients to flow through the latent sampling process.
+
+Decoder
+
+Converts sampled latent vectors back into reconstructed images
+
+Architecture mirrors the encoder
+
+Step 4: Loss Function Design
+Reconstruction Loss
+
+Mean Squared Error (MSE) between input and reconstructed image
+
+Encourages faithful reconstruction of normal samples
+
+KL Divergence Loss
+
+Measures divergence between learned latent distribution and a standard normal distribution
+
+Regularizes the latent space
+
+Beta-VAE Objective
+
+A β-VAE formulation was used:
+
+𝐿
+=
+Reconstruction Loss
++
+𝛽
+⋅
+KL Divergence
+L=Reconstruction Loss+β⋅KL Divergence
+
+β controls the trade-off between reconstruction quality and latent regularization
+
+Larger β enforces stronger disentanglement
+
+Step 5: Model Training
+
+Both AE and VAE were trained using:
+
+Optimizer: Adam
+
+Learning rate: 0.001
+
+Batch size: 128
+
+Epochs: 30
+
+Training Strategy
+
+Models were trained only on normal data
+
+Training loss was monitored across epochs to ensure convergence
+
+Step 6: Anomaly Scoring Mechanism
+
+Anomaly detection was performed using reconstruction error.
+
+Scoring Method
+
+Mean Squared Error calculated per sample
+
+Higher reconstruction error ⇒ higher anomaly likelihood
+
+Thresholding
+
+A percentile-based threshold (95th percentile) was applied
+
+Samples exceeding the threshold were classified as anomalies
+
+Step 7: Evaluation Metrics
+
+To quantitatively assess anomaly detection performance, the following metrics were used:
+
+AUC-ROC
+
+Measures the ability to rank anomalous samples higher than normal ones
+
+Threshold-independent evaluation
+
+F1-Score
+
+Combines precision and recall
+
+Evaluated using the selected anomaly threshold
+
+Metrics were computed for both AE and VAE to allow direct comparison.
+
+Step 8: Performance Comparison
+Autoencoder (AE)
+
+Strong reconstruction fidelity for normal samples
+
+Less robust latent representation
+
+Lower anomaly separation in some cases
+
+Variational Autoencoder (VAE)
+
+More structured latent space
+
+Better generalization
+
+Improved anomaly discrimination, especially with tuned β
+
+Final Project Summary
+
+This project presents a complete implementation and evaluation of Variational Autoencoders (VAEs) for unsupervised anomaly detection, with a standard Autoencoder (AE) used as a baseline. A high-dimensional image dataset (MNIST) was employed, with only normal samples used for training and anomalies injected during testing.
+
+The VAE architecture incorporates probabilistic latent variables, the reparameterization trick, and a KL divergence regularization term. A Beta-VAE formulation was adopted to control the balance between reconstruction accuracy and latent space regularization. Both models were trained under identical conditions to ensure a fair comparison.
+
+Anomalies were detected using reconstruction error, and performance was evaluated using AUC-ROC and F1-score metrics. Experimental results demonstrate that the VAE consistently provides a more structured latent representation and improved anomaly detection capability compared to the standard AE, particularly when appropriate β values are used.
+
+Overall, this project highlights the advantages of VAEs over traditional autoencoders for anomaly detection tasks in high-dimensional data, demonstrating their effectiveness in learning robust representations of normal behavior while accurately identifying deviations.
